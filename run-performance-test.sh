@@ -41,7 +41,7 @@ do
         echo "Report location is ${report_location}"
         mkdir -p $report_location
 
-	nohup sshpass -p 'javawso2' ssh -n -f wso2@192.168.32.11 "/bin/bash /home/Pasindu/wso2/start.sh ${heap} ${total_users}" &
+	nohup sshpass -p 'javawso2' ssh -n -f wso2@192.168.32.11 "/bin/bash /home/wso2/Pasindu/start.sh ${heap} ${total_users}" &
 	
 	while true 
 	do
