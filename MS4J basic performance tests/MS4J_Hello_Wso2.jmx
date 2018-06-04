@@ -21,7 +21,7 @@
         <stringProp name="ThreadGroup.num_threads">${__P(group1.threads)}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">0</stringProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
-        <stringProp name="ThreadGroup.duration">900</stringProp>
+        <stringProp name="ThreadGroup.duration">${__P(group1.seconds)}</stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
       </ThreadGroup>
       <hashTree>
