@@ -18,8 +18,10 @@
 # ----------------------------------------------------------------------------
 
 
-concurrent_users=(1  5  10  20  50 100 200 500 1000 1500 2000 2500)
-heap_sizes=(50m 100m 200m 500m 1g 2g 4g 8g)
+concurrent_users=(1  5) #to be changed
+heap_sizes=(50m 100m) #to be changed
+garbage_collectors=(UseSerialGC UseParallelGC) #add UseConcMarkSweepGC UseG1GC
+message_size=(50 1024 10240 102400) #to be checked later
 
 jtl_location=/home/wso2/pasindu/jtls
 
@@ -41,7 +43,9 @@ dashboards_path=/home/wso2/pasindu/dashboards
 jmeter_path=/home/wso2/pasindu/apache-jmeter-4.0/bin
 
 
-test_duration=5 #to be changed to ___
+test_duration=120 #to be changed to ___
+
+split_time=1 #to be changed to 5
 
 
 
@@ -50,31 +54,31 @@ do
     for u in ${concurrent_users[@]}
     do
         
-        total_users=$(($u))
-        report_location=$jtl_location/${total_users}_users/${heap}_heap
-        echo "Report location is ${report_location}"
-        mkdir -p $report_location
+        for gc in ${garbage_collectors[@]}
+    	do
+        	total_users=$(($u))
+        	report_location=$jtl_location/${total_users}_users/${heap}_heap/${gc}_collector
+        	echo "Report location is ${report_location}"
+        	mkdir -p $report_location
 
-	nohup sshpass -p 'javawso2' ssh -n -f ${ms4j_host_user} "/bin/bash $target_script ${heap} ${total_users} ${target_gc_logs_path}" &
+		nohup sshpass -p 'javawso2' ssh -n -f ${ms4j_host_user} "/bin/bash $target_script ${heap} ${total_users} ${target_gc_logs_path} ${gc}" &
 	
-	while true 
-	do
-		echo "Checking service"
-    		response_code=$(curl -s -o /dev/null -w "%{http_code}" http://${ms4j_host}:9090/hello/wso2)
-    		if [ $response_code -eq 200 ]; then
-        		echo "MS4j started"
-        		break
-    		else
-        		sleep 10
-    		fi
-	done
-	
-	
+		while true 
+		do
+			echo "Checking service"
+    			response_code=$(curl -s -o /dev/null -w "%{http_code}" http://${ms4j_host}:9090/hello/wso2)
+    			if [ $response_code -eq 200 ]; then
+        			echo "MS4j started"
+        			break
+    			else
+        			sleep 10
+    			fi
+		done
+	        	
 
-
-        # Start JMeter server
-        ${jmeter_path}/jmeter  -Jgroup1.threads=$u -Jgroup1.seconds=${test_duration} -n -t ${jmx_file} -l ${report_location}/results.jtl	
-        
+        	# Start JMeter server
+        	${jmeter_path}/jmeter  -Jgroup1.threads=$u -Jgroup1.seconds=${test_duration} -n -t ${jmx_file} -l ${report_location}/results.jtl	
+        done
 	
         
     done
@@ -98,12 +102,12 @@ for heap in ${heap_sizes[@]}
 do
     for u in ${concurrent_users[@]}
     do
-        
-        total_users=$(($u))
-        jtl_file=${jtl_location}/${total_users}_users/${heap}_heap/results.jtl
-        
-	java -jar ${jtl_splitter_path}/jtl-splitter-0.1.1-SNAPSHOT.jar -f $jtl_file -t 5 -d	
-        
+        for gc in ${garbage_collectors[@]}
+    	do
+        	total_users=$(($u))
+        	jtl_file=${jtl_location}/${total_users}_users/${heap}_heap/${gc}_collector/results.jtl        
+		java -jar ${jtl_splitter_path}/jtl-splitter-0.1.1-SNAPSHOT.jar -f $jtl_file -t $split_time -d	
+        done
     done
 done
 
@@ -117,20 +121,18 @@ for heap in ${heap_sizes[@]}
 do
     for u in ${concurrent_users[@]}
     do
-        
-        total_users=$(($u))
-        report_location=${dashboards_path}/${total_users}_users/${heap}_heap
-        echo "Report location is ${report_location}"
-        mkdir -p $report_location
+        for gc in ${garbage_collectors[@]}
+    	do    
+        	total_users=$(($u))
+        	report_location=${dashboards_path}/${total_users}_users/${heap}_heap/${gc}_collector
+        	echo "Report location is ${report_location}"
+        	mkdir -p $report_location
 	
-	${jmeter_path}/jmeter -g  ${jtl_location}/${total_users}_users/${heap}_heap/results-measurement.jtl   -o $report_location	
+		${jmeter_path}/jmeter -g  ${jtl_location}/${total_users}_users/${heap}_heap/${gc}_collector/results-measurement.jtl   -o $report_location	
+        done
         
     done
 done
 
 
 echo "Completed generating dashboards"
-
-
-
-

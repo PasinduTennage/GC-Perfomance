@@ -21,6 +21,7 @@
 heap_size=$1
 num_users=$2 
 target_gc_logs_path=$3
+gc=$4
 
 mkdir -p ${target_gc_logs_path}
 
@@ -30,4 +31,4 @@ echo "Setting Heap to ${heap_size}"
 export JVM_MEM_OPTS="-Xms${heap_size} -Xmx${heap_size}  "
         
 echo "Starting MS4J Hello World"
-/opt/jdk1.8.0_162/bin/java -Xloggc:${target_gc_logs_path}/${heap_size}_Heap_${num_users}_Users_GCLog.txt  -verbose:gc -XX:+PrintGCDateStamps -Xms${heap_size} -Xmx${heap_size}  -jar /home/wso2/Pasindu/Hello-Service-*.jar
+/opt/jdk1.8.0_162/bin/java -Xloggc:${target_gc_logs_path}/${heap_size}_Heap_${num_users}_Users_${gc}_collector_GCLog.txt  -verbose:gc -XX:+PrintGCDateStamps -XX:+${gc} -Xms${heap_size} -Xmx${heap_size}  -jar /home/wso2/Pasindu/Hello-Service-*.jar
