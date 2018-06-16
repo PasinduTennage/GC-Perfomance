@@ -42,6 +42,10 @@ dashboards_path=/home/wso2/pasindu/dashboards
 
 jmeter_path=/home/wso2/pasindu/apache-jmeter-4.0/bin
 
+performance_report_python_file=/home/wso2/pasindu/performance/performance-report.py
+
+performance_report_output_file=/home/wso2/pasindu/MS4Jperformance.csv
+
 
 test_duration=120 #to be changed to ___
 
@@ -136,3 +140,8 @@ done
 
 
 echo "Completed generating dashboards"
+
+
+echo "Generating the CSV file"
+
+python3 $performance_report_python_file  $jtl_location $target_gc_logs_path $performance_report_output_file

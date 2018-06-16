@@ -5,6 +5,8 @@ from scipy.stats.kde import gaussian_kde
 import matplotlib.pyplot as plt
 
 
+
+
 heap_sizes = ["100m", "200m", "500m", "1g", "2g", "4g", "8g"]
 colors = ['r', 'b', 'y', 'g', 'r', 'c', 'm']
 latencies = {}
