@@ -26,4 +26,4 @@ def getPDF(values):
 def getThroughput(time_values):
     # Return the throughput
     num_items = len(time_values)
-    return num_items/(1000*(time_values[num_items-1]-time_values[0]))
+    return 1000*num_items/(time_values[num_items-1]-time_values[0])

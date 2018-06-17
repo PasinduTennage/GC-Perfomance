@@ -1,4 +1,4 @@
-# "GC Throughput", "Full GC Pauses", "GC Pauses", "Accumulated Pauses", "Accumulated Full GC Pauses"
+
 
 def getGCThroughput():
     return 0

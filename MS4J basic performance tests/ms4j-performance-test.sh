@@ -18,9 +18,9 @@
 # ----------------------------------------------------------------------------
 
 
-concurrent_users=(1  5) #to be changed
-heap_sizes=(50m 100m) #to be changed
-garbage_collectors=(UseSerialGC UseParallelGC) #add UseConcMarkSweepGC UseG1GC
+concurrent_users=(2000) #to be changed
+heap_sizes=(100m) #to be changed
+garbage_collectors=(UseSerialGC UseParallelGC UseConcMarkSweepGC) #add UseConcMarkSweepGC
 message_size=(50 1024 10240 102400) #to be checked later
 
 jtl_location=/home/wso2/pasindu/jtls
@@ -47,9 +47,9 @@ performance_report_python_file=/home/wso2/pasindu/performance/performance-report
 performance_report_output_file=/home/wso2/pasindu/MS4Jperformance.csv
 
 
-test_duration=120 #to be changed to ___
+test_duration=5000 #to be changed to ___
 
-split_time=1 #to be changed to 5
+split_time=5 #to be changed to 5
 
 
 
@@ -144,4 +144,4 @@ echo "Completed generating dashboards"
 
 echo "Generating the CSV file"
 
-python3 $performance_report_python_file  $jtl_location $target_gc_logs_path $performance_report_output_file
+python3 $performance_report_python_file  $jtl_location $gc_logs_path $performance_report_output_file
