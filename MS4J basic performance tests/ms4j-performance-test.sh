@@ -20,8 +20,8 @@
 
 concurrent_users=(2000) #to be changed
 heap_sizes=(100m) #to be changed
-garbage_collectors=(UseSerialGC UseParallelGC UseConcMarkSweepGC) #add UseConcMarkSweepGC
-message_size=(50 1024 10240 102400) #to be checked later
+message_sizes=(50 1024 10240 102400)
+garbage_collectors=(UseSerialGC) #  UseParallelGC UseConcMarkSweepGC
 
 jtl_location=/home/wso2/pasindu/jtls
 
@@ -44,47 +44,65 @@ jmeter_path=/home/wso2/pasindu/apache-jmeter-4.0/bin
 
 performance_report_python_file=/home/wso2/pasindu/performance/performance-report.py
 
+payload_generator_python_file=/home/wso2/pasindu/performance/payloadGenarator.py
+
 performance_report_output_file=/home/wso2/pasindu/MS4Jperformance.csv
 
+payloads_output_file_root=/home/wso2/pasindu/payloads
 
-test_duration=5000 #to be changed to ___
+payload_files_prefix=payload
 
-split_time=5 #to be changed to 5
+test_duration=120 #to be changed to ___
 
+split_time=1 #to be changed to 5
 
+echo "Generating Payloads"
+mkdir -p $payloads_output_file_root
 
-for heap in ${heap_sizes[@]}
+python3 ${payload_generator_python_file} ${payloads_output_file_root}/${payload_files_prefix}
+
+echo "Finished generating payloads"
+
+for size in ${message_sizes[@]}
 do
-    for u in ${concurrent_users[@]}
-    do
-        
-        for gc in ${garbage_collectors[@]}
-    	do
-        	total_users=$(($u))
-        	report_location=$jtl_location/${total_users}_users/${heap}_heap/${gc}_collector
-        	echo "Report location is ${report_location}"
-        	mkdir -p $report_location
 
-		nohup sshpass -p 'javawso2' ssh -n -f ${ms4j_host_user} "/bin/bash $target_script ${heap} ${total_users} ${target_gc_logs_path} ${gc}" &
+    for heap in ${heap_sizes[@]}
+    do
+        for u in ${concurrent_users[@]}
+        do
+        
+            for gc in ${garbage_collectors[@]}
+    	    do
+        	    total_users=$(($u))
+                    
+        	    report_location=$jtl_location/${total_users}_users/${heap}_heap/${gc}_collector/${size}_message
+        	    echo "Report location is ${report_location}"
+        	    mkdir -p $report_location
+
+		    nohup sshpass -p 'javawso2' ssh -n -f ${ms4j_host_user} "/bin/bash $target_script ${heap} ${total_users} ${target_gc_logs_path} ${gc} ${size}" &
 	
-		while true 
-		do
-			echo "Checking service"
-    			response_code=$(curl -s -o /dev/null -w "%{http_code}" http://${ms4j_host}:9090/hello/wso2)
-    			if [ $response_code -eq 200 ]; then
-        			echo "MS4j started"
-        			break
-    			else
-        			sleep 10
-    			fi
-		done
+		    while true 
+		    do
+			    echo "Checking service"
+    			    response_code=$(curl -s -o /dev/null -w "%{http_code}" http://${ms4j_host}:9090/hello/wso2?data=m)
+    			    if [ $response_code -eq 200 ]; then
+        			    echo "MS4j started"
+        			    break
+    			    else
+        			    sleep 10
+    			    fi
+		    done
+                    
+		    message=$(<${payloads_output_file_root}/${payload_files_prefix}${size})
+                    
 	        	
 
-        	# Start JMeter server
-        	${jmeter_path}/jmeter  -Jgroup1.threads=$u -Jgroup1.seconds=${test_duration} -n -t ${jmx_file} -l ${report_location}/results.jtl	
-        done
+        	    # Start JMeter server
+        	    ${jmeter_path}/jmeter  -Jgroup1.threads=$u -Jgroup1.seconds=${test_duration} -Jgroup1.data=${message} -n -t ${jmx_file} -l ${report_location}/results.jtl	
+            done
 	
         
+        done
     done
 done
 
@@ -102,19 +120,22 @@ echo "Finished Copying GC logs to server machine"
 
 echo "Splitting JTL"
 
-for heap in ${heap_sizes[@]}
+for size in ${message_sizes[@]}
 do
-    for u in ${concurrent_users[@]}
+
+    for heap in ${heap_sizes[@]}
     do
-        for gc in ${garbage_collectors[@]}
-    	do
-        	total_users=$(($u))
-        	jtl_file=${jtl_location}/${total_users}_users/${heap}_heap/${gc}_collector/results.jtl        
-		java -jar ${jtl_splitter_path}/jtl-splitter-0.1.1-SNAPSHOT.jar -f $jtl_file -t $split_time -d	
+        for u in ${concurrent_users[@]}
+        do
+            for gc in ${garbage_collectors[@]}
+    	    do
+        	    total_users=$(($u))
+        	    jtl_file=${jtl_location}/${total_users}_users/${heap}_heap/${gc}_collector/${size}_message/results.jtl        
+		    java -jar ${jtl_splitter_path}/jtl-splitter-0.1.1-SNAPSHOT.jar -f $jtl_file -t $split_time -d	
+            done
         done
     done
 done
-
 
 echo "Completed Splitting jtl files"
 
@@ -128,11 +149,11 @@ do
         for gc in ${garbage_collectors[@]}
     	do    
         	total_users=$(($u))
-        	report_location=${dashboards_path}/${total_users}_users/${heap}_heap/${gc}_collector
+        	report_location=${dashboards_path}/${total_users}_users/${heap}_heap/${gc}_collector/${size}_message
         	echo "Report location is ${report_location}"
         	mkdir -p $report_location
 	
-		${jmeter_path}/jmeter -g  ${jtl_location}/${total_users}_users/${heap}_heap/${gc}_collector/results-measurement.jtl   -o $report_location	
+		${jmeter_path}/jmeter -g  ${jtl_location}/${total_users}_users/${heap}_heap/${gc}_collector/${size}_message/results-measurement.jtl   -o $report_location	
         done
         
     done
@@ -145,3 +166,5 @@ echo "Completed generating dashboards"
 echo "Generating the CSV file"
 
 python3 $performance_report_python_file  $jtl_location $gc_logs_path $performance_report_output_file
+
+echo "Finished generating CSV file"
