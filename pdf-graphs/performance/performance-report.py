@@ -1,7 +1,9 @@
 import sys
 from random import randint
-from performance.jtlParameters import *
-from performance.gcParameters import *
+from jtlParameters import *
+from gcParameters import  *
+from uptimeParameters import  *
+
 import csv
 
 
@@ -29,34 +31,41 @@ def getTimeStamps(jtl_file_name):
     return timeStamps
 
 def getNRandomeColors(n):
-
     colors = []
     for i in range(n):
         colors.append('%06X' % randint(0, 0xFFFFFF))
 
     return colors
 
-heap_sizes = ["100m"]
-concurrent_users = [2000]
-message_sizes= [50, 1024, 10240, 102400]
-garbage_collectors= ["UseSerialGC"] #, "UseParallelGC" , "UseConcMarkSweepGC"
+
+heap_sizes = ["100m", "200m"]
+concurrent_users = [1, 10]
+message_sizes= [10, 20]
+garbage_collectors= ["UseSerialGC", "UseG1GC"] #, "UseParallelGC" , "UseConcMarkSweepGC"
 
 jtl_file_root = sys.argv[1]
-gc_file_root = sys.argv[2]
-output_csv_file = sys.argv[3]
+gc_reports_root = sys.argv[2]
+uptime_reports_root = sys.argv[3]
+output_csv_file = sys.argv[4]
+
+
 
 csv_file_records = []
+headers = ['size', 'heap', 'user', 'collector', 'average_latency', 'min_latency', 'max_latency', 'percentile_90', 'percentile_95', 'percentile_99', 'throughput',
+                       'gc_throughput', 'min_pause', 'max_pause', 'avg_pause', 'num_minor_gc', 'num_full_gc', 'accumulated_minor_gc_pause', 'accumulated_full_gc_pause', 'avg_foot_print_after_full_gc', 'avg_foot_print_after_full_GC_σ',
+                       'freed_memory_by_full_GC', 'avg_freed_memory_by_full_GC', 'avg_foot_print_after_GC', 'avg_foot_print_after_GC_σ', 'freed_memory_by_GC', 'avg_freed_memory_by_GC', 'gc_performance', 'full_gc_performance',
+                       'last_one_minutes_la', 'last_five_minutes_la', 'last_fifteen_minutes_la']
 csv_file_records.append(["Message Size","Heap", "Concurrent Users", "Garbage Collector", "Average Latency", "Min Latnecy", "Max Latnecy", "90% Percentile Latency", "95% Percentile Latency", "99% Percentile Latency", "Throughput (Requests per second)", "GC Throughput", "Full GC Pauses", "Minor GC Pauses", "Accumulated Minor GC Pauses", "Accumulated Full GC Pauses", "Min GC Pause", "Max GC Pause"])
+
+
 
 for size in message_sizes:
     for heap in heap_sizes:
         for user in concurrent_users:
             for collector in garbage_collectors:
                 jtl_file_name = jtl_file_root+"/"+str(user)+"_users/"+heap+"_heap/"+collector+"_collector/"+str(size)+"_message/results-measurement.jtl"
-                gc_log_name = gc_file_root+"/GCLogs/"+heap+"_Heap_"+str(user)+"_Users_"+collector+"_collector_" +str(size)+"_size_GCLog.txt"
-
-
-                gc_file = open(gc_log_name, "r")
+                gc_log_name = gc_reports_root+"/"+heap+"_Heap_"+str(user)+"_Users_"+collector+"_collector_" +str(size)+"_size_GCReport.csv"
+                uptime_file_name = uptime_reports_root+"/uptime_dir/"+heap+"_Heap_"+str(user)+"_Users_"+collector+"_collector_" +str(size)+"_size_uptime.txt"
 
                 latencies  = getLatencies(jtl_file_name)
                 timeStamps = getTimeStamps (jtl_file_name)
@@ -73,21 +82,38 @@ for size in message_sizes:
 
                 # "GC Throughput", "Full GC Pauses", "Minor GC Pauses", "Accumulated Minor GC Pauses", "Accumulated Full GC Pauses", "Min GC Pause", "Max GC Pause"
 
-                content = readGCfile(gc_log_name)
-                full_gc_times = getFullGCTimes(content)
-                minor_gc_times = getMinorGCTimes(content)
+                gc_parameters = readGCfile(gc_log_name)
 
-                total_execution_time =  getTotalExecutionTime(content)
-                accumilated_full_gc_time =  getAccumilatedFullGCTime(full_gc_times)
-                accumilated_minor_gc_time = getAccumilatedGCTime(full_gc_times, minor_gc_times)
-                gc_throughput = getGCThroughput(getAccumilatedGCTime(full_gc_times, minor_gc_times), getTotalExecutionTime(content))
-                number_of_minor_gc_pauses = getNumberOfMinorGCPauses((minor_gc_times))
-                numer_of_full_gc_pauses = getNumberOfFullGCPauses(full_gc_times)
-                min_gc_pauses = getMinPause(minor_gc_times, full_gc_times)
-                max_gc_pauses = getMaxPause(minor_gc_times, full_gc_times)
+                gc_throughput = getGCThroughput(gc_parameters)
+                min_pause = getMinGCPause(gc_parameters)
+                max_pause = getMaxGCPause(gc_parameters)
+                avg_pause = getAvgPause(gc_parameters)
+                num_minor_gc = getNumMinorGCPauses(gc_parameters)
+                num_full_gc = getNumFullGCPauses(gc_parameters)
+                accumulated_minor_gc_pause = getAccumilatedMinorGCTime(gc_parameters)
+                accumulated_full_gc_pause = getAccumilatedFullGCTime(gc_parameters)
+                avg_foot_print_after_full_gc = getAvgfootprintAfterFullGC(gc_parameters)
+                avg_foot_print_after_full_GC_σ = getAvgfootprintAfterFullGCσ(gc_parameters)
+                freed_memory_by_full_GC = getFreedMemoryByFullGC(gc_parameters)
+                avg_freed_memory_by_full_GC = getAvgFreedMemoryByFullGC(gc_parameters)
+                avg_foot_print_after_GC = getAvgfootprintAfterGC(gc_parameters)
+                avg_foot_print_after_GC_σ = getAvgfootprintAfterGCσ(gc_parameters)
+                freed_memory_by_GC = getFreedMemoryByGC(gc_parameters)
+                avg_freed_memory_by_GC =  getAvgFreedMemoryByGC(gc_parameters)
+                gc_performance =  getGCPerformance(gc_parameters)
+                full_gc_performance = getFullGCPerformance(gc_parameters)
 
 
-                row = [size, heap, user, collector, average_latency, min_latency, max_latency, percentile_90, percentile_95, percentile_99, throughput, gc_throughput, numer_of_full_gc_pauses, number_of_minor_gc_pauses, accumilated_minor_gc_time, accumilated_full_gc_time, min_gc_pauses, max_gc_pauses]
+
+                load_averages = getLoadAverages(uptime_file_name)
+                last_one_minutes_la = load_averages[1]
+                last_five_minutes_la = load_averages[5]
+                last_fifteen_minutes_la = load_averages[15]
+
+                row = [size, heap, user, collector, average_latency, min_latency, max_latency, percentile_90, percentile_95, percentile_99, throughput,
+                       gc_throughput, min_pause, max_pause, avg_pause, num_minor_gc, num_full_gc, accumulated_minor_gc_pause, accumulated_full_gc_pause, avg_foot_print_after_full_gc, avg_foot_print_after_full_GC_σ,
+                       freed_memory_by_full_GC, avg_freed_memory_by_full_GC, avg_foot_print_after_GC, avg_foot_print_after_GC_σ, freed_memory_by_GC, avg_freed_memory_by_GC, gc_performance, full_gc_performance,
+                       last_one_minutes_la, last_five_minutes_la, last_fifteen_minutes_la]
                 csv_file_records.append(row)
 
 with open(output_csv_file, "w") as csv_file:

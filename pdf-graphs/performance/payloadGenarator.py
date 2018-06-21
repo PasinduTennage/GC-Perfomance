@@ -21,6 +21,6 @@ def writePayLoads(message_sizes, payloads):
         file.write(payloads[i])
 
 output_file_root = sys.argv[1]
-message_sizes= [50, 1024, 10240, 102400]
+message_sizes= [10, 20]
 payloads = generatePayloads(message_sizes)
 writePayLoads(message_sizes, payloads)

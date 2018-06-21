@@ -18,21 +18,29 @@
 # ----------------------------------------------------------------------------
 
 
-concurrent_users=(2000) #to be changed
-heap_sizes=(100m) #to be changed
-message_sizes=(50 1024 10240 102400)
-garbage_collectors=(UseSerialGC) #  UseParallelGC UseConcMarkSweepGC
+concurrent_users=(1 10) #to be changed 1 50 100 200 
+heap_sizes=(100m 200m) #to be changed  200m 500m 1g 2g 4g 8g
+message_sizes=(10 20) # 400 1600
+garbage_collectors=(UseSerialGC UseG1GC) #UseSerialGC UseParallelGC UseConcMarkSweepGC  
 
 jtl_location=/home/wso2/pasindu/jtls
 
 ms4j_host_user=wso2@192.168.32.11 
 ms4j_host=192.168.32.11
 
+target_uptime_path=/home/wso2/Pasindu/uptime_dir
+
+uptime_path=/home/wso2/pasindu/uptime_dir
+
 target_script=/home/wso2/Pasindu/start.sh
+
+target_uptime_script=/home/wso2/Pasindu/uptime_script.sh
 
 target_gc_logs_path=/home/wso2/Pasindu/GCLogs
 
 gc_logs_path=/home/wso2/pasindu/GCLogs
+
+gc_logs_report_path=/home/wso2/pasindu/gcReports
 
 jmx_file=/home/wso2/pasindu/jmx/MS4J_Hello_Wso2.jmx
 
@@ -52,9 +60,19 @@ payloads_output_file_root=/home/wso2/pasindu/payloads
 
 payload_files_prefix=payload
 
-test_duration=120 #to be changed to ___
+gc_viewer_jar_file=/home/wso2/pasindu/gc_viewer/gcviewer-1.36-SNAPSHOT.jar
+
+test_duration=120	 #to be changed to ___
 
 split_time=1 #to be changed to 5
+
+rm -r $gc_logs_path/
+rm -r $dashboards_path/
+rm -r $gc_logs_report_path/
+rm -r $jtl_location
+rm -r $payloads_output_file_root/
+rm -r $uptime_path/
+rm $performance_report_output_file
 
 echo "Generating Payloads"
 mkdir -p $payloads_output_file_root
@@ -98,7 +116,12 @@ do
 	        	
 
         	    # Start JMeter server
-        	    ${jmeter_path}/jmeter  -Jgroup1.threads=$u -Jgroup1.seconds=${test_duration} -Jgroup1.data=${message} -n -t ${jmx_file} -l ${report_location}/results.jtl	
+        	    ${jmeter_path}/jmeter  -Jgroup1.threads=$u -Jgroup1.seconds=${test_duration} -Jgroup1.data=${message} -n -t ${jmx_file} -l ${report_location}/results.jtl
+                    
+                    echo "Running Uptime command"	
+
+                    nohup sshpass -p 'javawso2' ssh -n -f ${ms4j_host_user} "/bin/bash $target_uptime_script ${heap} ${total_users} ${target_uptime_path} ${gc} ${size}" &
+		    
             done
 	
         
@@ -117,6 +140,14 @@ mkdir -p ${gc_logs_path}
 sshpass -p 'javawso2' scp -r $ms4j_host_user:${target_gc_logs_path} ${gc_logs_path}
 
 echo "Finished Copying GC logs to server machine"
+
+echo "Copying uptime logs to Jmeter server machine"
+
+
+mkdir -p ${uptime_path}
+sshpass -p 'javawso2' scp -r $ms4j_host_user:${target_uptime_path} ${uptime_path}
+
+echo "Finished Copying uptime logs to server machine"
 
 echo "Splitting JTL"
 
@@ -141,30 +172,59 @@ echo "Completed Splitting jtl files"
 
 echo "Generating Dash Boards"
 
-
-for heap in ${heap_sizes[@]}
+for size in ${message_sizes[@]}
 do
-    for u in ${concurrent_users[@]}
+    for heap in ${heap_sizes[@]}
     do
-        for gc in ${garbage_collectors[@]}
-    	do    
-        	total_users=$(($u))
-        	report_location=${dashboards_path}/${total_users}_users/${heap}_heap/${gc}_collector/${size}_message
-        	echo "Report location is ${report_location}"
-        	mkdir -p $report_location
+        for u in ${concurrent_users[@]}
+        do
+            for gc in ${garbage_collectors[@]}
+    	    do    
+        	    total_users=$(($u))
+        	    report_location=${dashboards_path}/${total_users}_users/${heap}_heap/${gc}_collector/${size}_message
+        	    echo "Report location is ${report_location}"
+        	    mkdir -p $report_location
 	
-		${jmeter_path}/jmeter -g  ${jtl_location}/${total_users}_users/${heap}_heap/${gc}_collector/${size}_message/results-measurement.jtl   -o $report_location	
-        done
+                    ${jmeter_path}/jmeter -g  ${jtl_location}/${total_users}_users/${heap}_heap/${gc}_collector/${size}_message/results-measurement.jtl   -o $report_location	
+            done
         
+        done
     done
 done
 
 
 echo "Completed generating dashboards"
 
+echo "Generating GC reports"
+
+mkdir -p $gc_logs_report_path
+
+
+for size in ${message_sizes[@]}
+do
+    for heap in ${heap_sizes[@]}
+    do
+        for u in ${concurrent_users[@]}
+        do
+            for gc in ${garbage_collectors[@]}
+    	    do    
+        	    total_users=$(($u))
+        	    gc_file=${gc_logs_path}/GCLogs/${heap}_Heap_${total_users}_Users_${gc}_collector_${size}_size_GCLog.txt
+                    gc_report_file=$gc_logs_report_path/${heap}_Heap_${total_users}_Users_${gc}_collector_${size}_size_GCReport.csv
+                    java -jar $gc_viewer_jar_file $gc_file $gc_report_file
+	
+            done
+        
+        done
+    done
+done
+
+
+echo "Completed generating GC reports"
+
 
 echo "Generating the CSV file"
 
-python3 $performance_report_python_file  $jtl_location $gc_logs_path $performance_report_output_file
+python3 $performance_report_python_file  $jtl_location $gc_logs_report_path $uptime_path $performance_report_output_file
 
 echo "Finished generating CSV file"
