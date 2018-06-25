@@ -66,24 +66,24 @@ def getErrorRate(jtl_file_name):
             num_error = num_error+1
     return 100*(float(num_error)/float(len(status)))
 
-latencies  = getLatencies("/home/pasindu/Desktop/results-measurement.jtl")
-timeStamps = getTimeStamps("/home/pasindu/Desktop/results-measurement.jtl")
-
-
-error_rate = getErrorRate("/home/pasindu/Desktop/results-measurement.jtl")
-average_latency = getAverageLatency(np.array(latencies))
-min_latency = getMinLatency(np.array(latencies))
-max_latency = getMaxLatency(np.array(latencies))
-percentile_90= getNPercentileLatency(np.array(latencies), 90)
-percentile_95 = getNPercentileLatency(np.array(latencies), 95)
-percentile_99 = getNPercentileLatency(np.array(latencies), 99)
-throughput = getThroughput(timeStamps)
-
-print(average_latency)
-print(min_latency)
-print(max_latency)
-print(percentile_90)
-print(percentile_95)
-print(percentile_99)
-print(throughput)
-print(error_rate)
+# latencies  = getLatencies("/home/pasindu/Desktop/results-measurement.jtl")
+# timeStamps = getTimeStamps("/home/pasindu/Desktop/results-measurement.jtl")
+#
+#
+# error_rate = getErrorRate("/home/pasindu/Desktop/results-measurement.jtl")
+# average_latency = getAverageLatency(np.array(latencies))
+# min_latency = getMinLatency(np.array(latencies))
+# max_latency = getMaxLatency(np.array(latencies))
+# percentile_90= getNPercentileLatency(np.array(latencies), 90)
+# percentile_95 = getNPercentileLatency(np.array(latencies), 95)
+# percentile_99 = getNPercentileLatency(np.array(latencies), 99)
+# throughput = getThroughput(timeStamps)
+#
+# print(average_latency)
+# print(min_latency)
+# print(max_latency)
+# print(percentile_90)
+# print(percentile_95)
+# print(percentile_99)
+# print(throughput)
+# print(error_rate)

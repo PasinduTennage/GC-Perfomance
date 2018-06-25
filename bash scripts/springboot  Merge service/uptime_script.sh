@@ -20,14 +20,13 @@
 
 heap_size=$1
 num_users=$2 
-target_gc_logs_path=$3
+target_uptime_path=$3
+gc=$4
+size=$5
 
-mkdir -p ${target_gc_logs_path}
 
-killall java
 
-echo "Setting Heap to ${heap_size}"
-export JVM_MEM_OPTS="-Xms${heap_size} -Xmx${heap_size}  "
+mkdir -p ${target_uptime_path}
+
         
-echo "Starting MS4J Hello World"
-/opt/jdk1.8.0_162/bin/java -Xloggc:${target_gc_logs_path}/${heap_size}_Heap_${num_users}_Users_GCLog.txt  -verbose:gc -XX:+PrintGCDateStamps -Xms${heap_size} -Xmx${heap_size}  -jar /home/wso2/Pasindu/Hello-Service-*.jar
+uptime > ${target_uptime_path}/${heap_size}_Heap_${num_users}_Users_${gc}_collector_${size}_size_uptime.txt 

@@ -1,8 +1,8 @@
 import sys
 from random import randint
-from performance.jtlParameters import *
-from performance.gcParameters import  *
-from performance.uptimeParameters import  *
+from jtlParameters import *
+from gcParameters import  *
+from uptimeParameters import  *
 
 import csv
 
@@ -17,9 +17,9 @@ def getNRandomeColors(n):
     return colors
 
 
-heap_sizes = ["100m", "200"]
-concurrent_users = [1, 10]
-message_sizes= [50, 100]
+heap_sizes = ["100m", "1g"]
+concurrent_users = [1, 500]
+message_sizes= [50, 1024]
 garbage_collectors= ["UseSerialGC", "UseG1GC"] #, "UseParallelGC" , "UseConcMarkSweepGC"
 
 jtl_file_root = sys.argv[1]

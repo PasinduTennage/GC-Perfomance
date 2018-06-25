@@ -65,62 +65,62 @@ def readGCfile(gc_log_name):
 
     return gc_parameters
 
-gc_parameters = readGCfile("/home/pasindu/Desktop/100m_Heap_10_Users_UseG1GC_collector_100_size_GCReport.csv")
-
-footprint  = gc_parameters["footprint"]
-
-footprintAfterFullGC = gc_parameters["footprintAfterFullGC"]
-
-avgFreedMemoryByFullGC = gc_parameters["avgFreedMemoryByFullGC"]
-
-avgfootprintAfterGC = gc_parameters["avgfootprintAfterGC"]
-
-avgFreedMemoryByGC = gc_parameters["avgFreedMemoryByGC"]
-
-avgPause = gc_parameters["avgPause"]
-
-minPause = gc_parameters["minPause"]
-
-maxPause = gc_parameters["maxPause"]
-
-avgGCPause = gc_parameters["avgGCPause"]
-
-avgFullGCPause = gc_parameters["avgFullGCPause"]
-
-accumPause = gc_parameters["accumPause"]
-
-fullGCPause = gc_parameters["fullGCPause"]
-
-gcPause = gc_parameters["gcPause"]
-
-gc_throughput = gc_parameters["throughput"]
-
-num_full_gc= gc_parameters["Number of full GC"]
-
-num_minor_gc = gc_parameters["Number of Minor GC"]
-
-freedMemoryPerMin = gc_parameters["freedMemoryPerMin"]
-
-gcPerformance = gc_parameters["gcPerformance"]
-
-fullGCPerformance = gc_parameters["fullGCPerformance"]
-
-print(footprint)
-print(footprintAfterFullGC)
-print(avgFreedMemoryByFullGC)
-print(avgfootprintAfterGC)
-print(avgFreedMemoryByGC)
-print(avgPause)
-print(minPause)
-print(maxPause)
-print(avgGCPause)
-print(avgFullGCPause)
-print(accumPause)
-print(fullGCPause)
-print(gcPause)
-print(gc_throughput)
-print(num_full_gc)
-print(num_minor_gc)
-print(freedMemoryPerMin)
-print(gcPerformance)
-print(fullGCPerformance)
+# gc_parameters = readGCfile("/home/pasindu/Desktop/100m_Heap_10_Users_UseG1GC_collector_100_size_GCReport.csv")
+#
+# footprint  = gc_parameters["footprint"]
+#
+# footprintAfterFullGC = gc_parameters["footprintAfterFullGC"]
+#
+# avgFreedMemoryByFullGC = gc_parameters["avgFreedMemoryByFullGC"]
+#
+# avgfootprintAfterGC = gc_parameters["avgfootprintAfterGC"]
+#
+# avgFreedMemoryByGC = gc_parameters["avgFreedMemoryByGC"]
+#
+# avgPause = gc_parameters["avgPause"]
+#
+# minPause = gc_parameters["minPause"]
+#
+# maxPause = gc_parameters["maxPause"]
+#
+# avgGCPause = gc_parameters["avgGCPause"]
+#
+# avgFullGCPause = gc_parameters["avgFullGCPause"]
+#
+# accumPause = gc_parameters["accumPause"]
+#
+# fullGCPause = gc_parameters["fullGCPause"]
+#
+# gcPause = gc_parameters["gcPause"]
+#
+# gc_throughput = gc_parameters["throughput"]
+#
+# num_full_gc= gc_parameters["Number of full GC"]
+#
+# num_minor_gc = gc_parameters["Number of Minor GC"]
+#
+# freedMemoryPerMin = gc_parameters["freedMemoryPerMin"]
+#
+# gcPerformance = gc_parameters["gcPerformance"]
+#
+# fullGCPerformance = gc_parameters["fullGCPerformance"]
+#
+# print(footprint)
+# print(footprintAfterFullGC)
+# print(avgFreedMemoryByFullGC)
+# print(avgfootprintAfterGC)
+# print(avgFreedMemoryByGC)
+# print(avgPause)
+# print(minPause)
+# print(maxPause)
+# print(avgGCPause)
+# print(avgFullGCPause)
+# print(accumPause)
+# print(fullGCPause)
+# print(gcPause)
+# print(gc_throughput)
+# print(num_full_gc)
+# print(num_minor_gc)
+# print(freedMemoryPerMin)
+# print(gcPerformance)
+# print(fullGCPerformance)
