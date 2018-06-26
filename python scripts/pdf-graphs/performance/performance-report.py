@@ -16,10 +16,16 @@ def getNRandomeColors(n):
 
     return colors
 
+def getIfHasAttribute(dictionary, key):
+    if(key in list(dictionary.keys())):
+        return dictionary[key]
+    else:
+        return ""
+
 
 heap_sizes = ["100m", "1g"]
 concurrent_users = [1, 500]
-message_sizes= [50, 1024]
+message_sizes= [50]
 garbage_collectors= ["UseSerialGC", "UseG1GC"] #, "UseParallelGC" , "UseConcMarkSweepGC"
 
 jtl_file_root = sys.argv[1]
@@ -30,8 +36,8 @@ output_csv_file = sys.argv[4]
 
 
 csv_file_records = []
-headers = ['size', 'heap', 'user', 'collector', 'average_latency', 'min_latency', 'max_latency', 'percentile_90', 'percentile_95', 'percentile_99', 'throughput',
-                       'footprint', 'footprintAfterFullGC', 'avgFreedMemoryByFullGC', 'avgfootprintAfterGC', 'avgFreedMemoryByGC',
+headers = ['size', 'heap', 'user', 'collector', 'average_latency', 'min_latency', 'max_latency', 'percentile_90', 'percentile_95', 'percentile_99', 'throughput', 'error_rate',
+                       'footprint', 'avgfootprintAfterFullGC', 'avgFreedMemoryByFullGC', 'avgfootprintAfterGC', 'avgFreedMemoryByGC',
                        'avgPause', 'minPause', 'maxPause', 'avgGCPause', 'avgFullGCPause', 'accumPause', 'fullGCPause',
                        'gcPause', 'gc_throughput', 'num_full_gc', 'num_minor_gc', 'freedMemoryPerMin', 'gcPerformance','fullGCPerformance',
                        'last_one_minutes_la', 'last_five_minutes_la', 'last_fifteen_minutes_la']
@@ -59,47 +65,48 @@ for size in message_sizes:
                 percentile_95 = getNPercentileLatency(np.array(latencies), 95)
                 percentile_99 = getNPercentileLatency(np.array(latencies), 99)
                 throughput = getThroughput(timeStamps)
+                error_rate = getErrorRate(jtl_file_name)
 
 
                 gc_parameters = readGCfile(gc_log_name)
 
-                footprint  = gc_parameters["footprint"]
+                footprint  = getIfHasAttribute(gc_parameters, "footprint")
 
-                footprintAfterFullGC = gc_parameters["footprintAfterFullGC"]
+                avgfootprintAfterFullGC = getIfHasAttribute(gc_parameters, "avgfootprintAfterFullGC")
 
-                avgFreedMemoryByFullGC = gc_parameters["avgFreedMemoryByFullGC"]
+                avgFreedMemoryByFullGC = getIfHasAttribute(gc_parameters, "avgFreedMemoryByFullGC")
 
-                avgfootprintAfterGC = gc_parameters["avgfootprintAfterGC"]
+                avgfootprintAfterGC = getIfHasAttribute(gc_parameters, "avgfootprintAfterGC")
 
-                avgFreedMemoryByGC = gc_parameters["avgFreedMemoryByGC"]
+                avgFreedMemoryByGC = getIfHasAttribute(gc_parameters, "avgFreedMemoryByGC")
 
-                avgPause = gc_parameters["avgPause"]
+                avgPause = getIfHasAttribute(gc_parameters, "avgPause")
 
-                minPause = gc_parameters["minPause"]
+                minPause = getIfHasAttribute(gc_parameters, "minPause")
 
-                maxPause = gc_parameters["maxPause"]
+                maxPause = getIfHasAttribute(gc_parameters, "maxPause")
 
-                avgGCPause = gc_parameters["avgGCPause"]
+                avgGCPause = getIfHasAttribute(gc_parameters, "avgGCPause")
 
-                avgFullGCPause = gc_parameters["avgFullGCPause"]
+                avgFullGCPause = getIfHasAttribute(gc_parameters, "avgFullGCPause")
 
-                accumPause = gc_parameters["accumPause"]
+                accumPause = getIfHasAttribute(gc_parameters, "accumPause")
 
-                fullGCPause = gc_parameters["fullGCPause"]
+                fullGCPause = getIfHasAttribute(gc_parameters, "fullGCPause")
 
-                gcPause = gc_parameters["gcPause"]
+                gcPause = getIfHasAttribute(gc_parameters, "gcPause")
 
-                gc_throughput = gc_parameters["throughput"]
+                gc_throughput = getIfHasAttribute(gc_parameters, "throughput")
 
-                num_full_gc= gc_parameters["Number of full GC"]
+                num_full_gc = getIfHasAttribute(gc_parameters, "Number of full GC")
 
-                num_minor_gc = gc_parameters["Number of Minor GC"]
+                num_minor_gc = getIfHasAttribute(gc_parameters, "Number of Minor GC")
 
-                freedMemoryPerMin = gc_parameters["freedMemoryPerMin"]
+                freedMemoryPerMin = getIfHasAttribute(gc_parameters, "freedMemoryPerMin")
 
-                gcPerformance = gc_parameters["gcPerformance"]
+                gcPerformance = getIfHasAttribute(gc_parameters, "gcPerformance")
 
-                fullGCPerformance = gc_parameters["fullGCPerformance"]
+                fullGCPerformance = getIfHasAttribute(gc_parameters, "fullGCPerformance")
 
 
 
@@ -109,8 +116,8 @@ for size in message_sizes:
                 last_five_minutes_la = load_averages[5]
                 last_fifteen_minutes_la = load_averages[15]
 
-                row = [size, heap, user, collector, average_latency, min_latency, max_latency, percentile_90, percentile_95, percentile_99, throughput,
-                       footprint, footprintAfterFullGC, avgFreedMemoryByFullGC, avgfootprintAfterGC, avgFreedMemoryByGC,
+                row = [size, heap, user, collector, average_latency, min_latency, max_latency, percentile_90, percentile_95, percentile_99, throughput, error_rate,
+                       footprint, avgfootprintAfterFullGC, avgFreedMemoryByFullGC, avgfootprintAfterGC, avgFreedMemoryByGC,
                        avgPause, minPause, maxPause, avgGCPause, avgFullGCPause, accumPause, fullGCPause,
                        gcPause, gc_throughput, num_full_gc, num_minor_gc, freedMemoryPerMin, gcPerformance,fullGCPerformance,
                        last_one_minutes_la, last_five_minutes_la, last_fifteen_minutes_la]

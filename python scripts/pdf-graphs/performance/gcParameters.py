@@ -6,70 +6,70 @@ def readGCfile(gc_log_name):
         sline = line.replace(",", "")
         entries = sline[:-1].split(";")
 
-        if(entries[0]=="footprint"):
+        if(entries[0].strip()=="footprint"):
             gc_parameters["footprint"] = entries[1].strip()
 
-        elif(entries[0]=="footprintAfterFullGC"):
-            gc_parameters["footprintAfterFullGC"] =  entries[1].strip()
+        elif(entries[0].strip()=="avgfootprintAfterFullGC"):
+            gc_parameters["avgfootprintAfterFullGC"] =  entries[1].strip()
 
-        elif (entries[0] == "avgFreedMemoryByFullGC"):
+        elif (entries[0].strip() == "avgFreedMemoryByFullGC"):
             gc_parameters["avgFreedMemoryByFullGC"] = entries[1].strip()
 
-        elif (entries[0] == "avgfootprintAfterGC"):
+        elif (entries[0].strip() == "avgfootprintAfterGC"):
             gc_parameters["avgfootprintAfterGC"] = entries[1].strip()
 
-        elif (entries[0] == "avgFreedMemoryByGC"):
+        elif (entries[0].strip() == "avgFreedMemoryByGC"):
             gc_parameters["avgFreedMemoryByGC"] = entries[1].strip()
 
-        elif (entries[0] == "avgPause"):
+        elif (entries[0].strip() == "avgPause"):
             gc_parameters["avgPause"] = entries[1].strip()
 
-        elif (entries[0] == "minPause"):
+        elif (entries[0].strip() == "minPause"):
             gc_parameters["minPause"] = entries[1].strip()
 
-        elif (entries[0] == "maxPause"):
+        elif (entries[0].strip() == "maxPause"):
             gc_parameters["maxPause"] = entries[1].strip()
 
-        elif (entries[0] == "avgGCPause"):
+        elif (entries[0].strip() == "avgGCPause"):
             gc_parameters["avgGCPause"] = entries[1].strip()
 
-        elif (entries[0] == "avgFullGCPause"):
+        elif (entries[0].strip() == "avgFullGCPause"):
             gc_parameters["avgFullGCPause"] = entries[1].strip()
 
-        elif (entries[0] == "accumPause"):
+        elif (entries[0].strip() == "accumPause"):
             gc_parameters["accumPause"] = entries[1].strip()
 
-        elif (entries[0] == "fullGCPause"):
+        elif (entries[0].strip() == "fullGCPause"):
             gc_parameters["fullGCPause"] = entries[1].strip()
 
-        elif (entries[0] == "gcPause"):
+        elif (entries[0].strip() == "gcPause"):
             gc_parameters["gcPause"] = entries[1].strip()
 
-        elif (entries[0] == "throughput"):
+        elif (entries[0].strip() == "throughput"):
             gc_parameters["throughput"] = entries[1].strip()
 
-        elif (entries[0] == "Number of full GC"):
+        elif (entries[0].strip() == "Number of full GC"):
             gc_parameters["Number of full GC"] = entries[1].strip()
 
-        elif (entries[0] == "Number of Minor GC"):
+        elif (entries[0].strip() == "Number of Minor GC"):
             gc_parameters["Number of Minor GC"] = entries[1].strip()
 
-        elif (entries[0] == "freedMemoryPerMin"):
+        elif (entries[0].strip() == "freedMemoryPerMin"):
             gc_parameters["freedMemoryPerMin"] = entries[1].strip()
 
-        elif (entries[0] == "gcPerformance"):
+        elif (entries[0].strip() == "gcPerformance"):
             gc_parameters["gcPerformance"] = entries[1].strip()
 
-        elif (entries[0] == "fullGCPerformance"):
+        elif (entries[0].strip() == "fullGCPerformance"):
             gc_parameters["fullGCPerformance"] = entries[1].strip()
 
     return gc_parameters
 
-# gc_parameters = readGCfile("/home/pasindu/Desktop/100m_Heap_10_Users_UseG1GC_collector_100_size_GCReport.csv")
+# gc_parameters = readGCfile("/home/pasindu/Desktop/100m_Heap_1_Users_UseSerialGC_collector_50_size_GCReport.csv")
 #
 # footprint  = gc_parameters["footprint"]
 #
-# footprintAfterFullGC = gc_parameters["footprintAfterFullGC"]
+# avgfootprintAfterFullGC = gc_parameters["avgfootprintAfterFullGC"]
 #
 # avgFreedMemoryByFullGC = gc_parameters["avgFreedMemoryByFullGC"]
 #
@@ -106,7 +106,7 @@ def readGCfile(gc_log_name):
 # fullGCPerformance = gc_parameters["fullGCPerformance"]
 #
 # print(footprint)
-# print(footprintAfterFullGC)
+# print(avgfootprintAfterFullGC)
 # print(avgFreedMemoryByFullGC)
 # print(avgfootprintAfterGC)
 # print(avgFreedMemoryByGC)

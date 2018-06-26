@@ -26,7 +26,7 @@ def getPDF(values):
 def getThroughput(time_values):
     # Return the throughput
     num_items = len(time_values)
-    return 1000*num_items/(time_values[num_items-1]-time_values[0])
+    return 1000*num_items/(max(time_values)-min(time_values))
 
 
 def getLatencies(jtl_file_name):

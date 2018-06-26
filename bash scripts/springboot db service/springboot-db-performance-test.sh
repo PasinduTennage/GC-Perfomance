@@ -20,7 +20,7 @@
 
 concurrent_users=(1 500) #to be changed 1 50 100 200 
 heap_sizes=(100m 1g) #to be changed  200m 500m 1g 2g 4g 8g
-message_sizes=(50 1024) # 400 1600
+message_sizes=(50) # 400 1600
 garbage_collectors=(UseSerialGC UseG1GC) #UseSerialGC UseParallelGC UseConcMarkSweepGC  
 
 jtl_location=/home/wso2/pasindu/jtls
@@ -42,7 +42,9 @@ gc_logs_path=/home/wso2/pasindu/GCLogs
 
 gc_logs_report_path=/home/wso2/pasindu/gcReports
 
-jmx_file=/home/wso2/pasindu/jmx/springboot_prime.jmx
+start_up_jmx_file=/home/wso2/pasindu/jmx/springboot_db_fill.jmx
+
+jmx_file=/home/wso2/pasindu/jmx/springboot_db.jmx
 
 jtl_splitter_path=/home/wso2/pasindu/Jmeter-Split
 
@@ -54,7 +56,7 @@ performance_report_python_file=/home/wso2/pasindu/performance/performance-report
 
 #payload_generator_python_file=/home/wso2/pasindu/performance/payloadGenarator.py
 
-performance_report_output_file=/home/wso2/pasindu/SpringBootPrimePerformance.csv
+performance_report_output_file=/home/wso2/pasindu/SpringBootDBPerformance.csv
 
 #payloads_output_file_root=/home/wso2/pasindu/payloads
 
@@ -74,12 +76,6 @@ rm -r $payloads_output_file_root/
 rm -r $uptime_path/
 rm $performance_report_output_file
 
-#echo "Generating Payloads"
-#mkdir -p $payloads_output_file_root
-
-#python3 ${payload_generator_python_file} ${payloads_output_file_root}/${payload_files_prefix}
-
-#echo "Finished generating payloads"
 
 for size in ${message_sizes[@]}
 do
@@ -98,11 +94,12 @@ do
         	    mkdir -p $report_location
 
 		    nohup sshpass -p 'javawso2' ssh -n -f ${springboot_host_user} "/bin/bash $target_script ${heap} ${total_users} ${target_gc_logs_path} ${gc} ${size}" &
-	
+
+		    echo "Populating DB"
 		    while true 
 		    do
 			    echo "Checking service"
-    			    response_code=$(curl -s -o /dev/null -w "%{http_code}" http://${springboot_host}:9000/prime?number=10)
+    			    response_code=$(curl -s -o /dev/null -w "%{http_code}" http://${springboot_host}:9000/db/all)
     			    if [ $response_code -eq 200 ]; then
         			    echo "Springboot started"
         			    break
@@ -110,13 +107,16 @@ do
         			    sleep 10
     			    fi
 		    done
-                    
-		    message=$size
-                    
-	        	
+
+		    ${jmeter_path}/jmeter  -Jgroup1.host=${springboot_host}  -Jgroup1.port=9000 -n -t ${start_up_jmx_file}
+
+		    echo "Finished populating DB"
+	
+		           
+		        	
 
         	    # Start JMeter server
-        	    ${jmeter_path}/jmeter  -Jgroup1.host=${springboot_host}  -Jgroup1.port=9000 -Jgroup1.threads=$u -Jgroup1.seconds=${test_duration} -Jgroup1.data=${message} -n -t ${jmx_file} -l ${report_location}/results.jtl
+        	    ${jmeter_path}/jmeter  -Jgroup1.host=${springboot_host}  -Jgroup1.port=9000 -Jgroup1.threads=$u -Jgroup1.seconds=${test_duration}  -n -t ${jmx_file} -l ${report_location}/results.jtl
                     
                     echo "Running Uptime command"	
 

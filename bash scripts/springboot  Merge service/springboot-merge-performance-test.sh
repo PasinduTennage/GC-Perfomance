@@ -54,7 +54,7 @@ performance_report_python_file=/home/wso2/pasindu/performance/performance-report
 
 #payload_generator_python_file=/home/wso2/pasindu/performance/payloadGenarator.py
 
-performance_report_output_file=/home/wso2/pasindu/SpringBootEchoPerformance.csv
+performance_report_output_file=/home/wso2/pasindu/SpringBootMergePerformance.csv
 
 #payloads_output_file_root=/home/wso2/pasindu/payloads
 
