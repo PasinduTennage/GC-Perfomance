@@ -18,9 +18,9 @@
 # ----------------------------------------------------------------------------
 
 
-concurrent_users=(1 500) #to be changed 1 50 100 200 
-heap_sizes=(100m 1g) #to be changed  200m 500m 1g 2g 4g 8g
-message_sizes=(50 1024) # 400 1600
+concurrent_users=(500 1000) #to be changed 1 50 100 200 
+heap_sizes=(100m 200m) #to be changed  200m 500m 1g 2g 4g 8g
+message_sizes=(1024 10240) # 400 1600
 garbage_collectors=(UseSerialGC UseG1GC) #UseSerialGC UseParallelGC UseConcMarkSweepGC  
 
 jtl_location=/home/wso2/pasindu/jtls
@@ -170,30 +170,30 @@ done
 
 echo "Completed Splitting jtl files"
 
-#echo "Generating Dash Boards"
+echo "Generating Dash Boards"
 
-#for size in ${message_sizes[@]}
-#do
-    #for heap in ${heap_sizes[@]}
-    #do
-        #for u in ${concurrent_users[@]}
-        #do
-            #for gc in ${garbage_collectors[@]}
-    	    #do    
-        	    #total_users=$(($u))
-        	    #report_location=${dashboards_path}/${total_users}_users/${heap}_heap/${gc}_collector/${size}_message
-        	    #echo "Report location is ${report_location}"
-        	    #mkdir -p $report_location
+for size in ${message_sizes[@]}
+do
+    for heap in ${heap_sizes[@]}
+    do
+        for u in ${concurrent_users[@]}
+        do
+            for gc in ${garbage_collectors[@]}
+    	    do    
+        	    total_users=$(($u))
+        	    report_location=${dashboards_path}/${total_users}_users/${heap}_heap/${gc}_collector/${size}_message
+        	    echo "Report location is ${report_location}"
+        	    mkdir -p $report_location
 	
-                    #${jmeter_path}/jmeter -g  ${jtl_location}/${total_users}_users/${heap}_heap/${gc}_collector/${size}_message/results-measurement.jtl   -o $report_location	
-            #done
+                    ${jmeter_path}/jmeter -g  ${jtl_location}/${total_users}_users/${heap}_heap/${gc}_collector/${size}_message/results-measurement.jtl   -o $report_location	
+            done
         
-        #done
-    #done
-#done
+        done
+    done
+done
 
 
-#echo "Completed generating dashboards"
+echo "Completed generating dashboards"
 
 echo "Generating GC reports"
 
@@ -225,6 +225,6 @@ echo "Completed generating GC reports"
 
 echo "Generating the CSV file"
 
-python3 $performance_report_python_file  $jtl_location $gc_logs_report_path $uptime_path $performance_report_output_file
+python3 $performance_report_python_file  $jtl_location $gc_logs_report_path $uptime_path $dashboards_path $performance_report_output_file
 
 echo "Finished generating CSV file"

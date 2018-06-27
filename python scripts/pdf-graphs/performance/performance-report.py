@@ -20,18 +20,19 @@ def getIfHasAttribute(dictionary, key):
     if(key in list(dictionary.keys())):
         return dictionary[key]
     else:
-        return ""
+        return "NA"
 
 
-heap_sizes = ["100m", "1g"]
-concurrent_users = [1, 500]
-message_sizes= [50]
+heap_sizes = ["100m", "200m"]
+concurrent_users = [500, 1000]
+message_sizes= [1024, 10240]
 garbage_collectors= ["UseSerialGC", "UseG1GC"] #, "UseParallelGC" , "UseConcMarkSweepGC"
 
 jtl_file_root = sys.argv[1]
 gc_reports_root = sys.argv[2]
 uptime_reports_root = sys.argv[3]
-output_csv_file = sys.argv[4]
+dashboard_files_root = sys.argv[4]
+output_csv_file = sys.argv[5]
 
 
 
@@ -52,20 +53,31 @@ for size in message_sizes:
                 jtl_file_name = jtl_file_root+"/"+str(user)+"_users/"+heap+"_heap/"+collector+"_collector/"+str(size)+"_message/results-measurement.jtl"
                 gc_log_name = gc_reports_root+"/"+heap+"_Heap_"+str(user)+"_Users_"+collector+"_collector_" +str(size)+"_size_GCReport.csv"
                 uptime_file_name = uptime_reports_root+"/uptime_dir/"+heap+"_Heap_"+str(user)+"_Users_"+collector+"_collector_" +str(size)+"_size_uptime.txt"
+                dashboard_file_name = dashboard_files_root+"/"+str(user)+"_users/"+heap+"_heap/"+collector+"_collector/"+str(size)+"_message/content/js/dashboard.js"
 
-                latencies  = getLatencies(jtl_file_name)
-                timeStamps = getTimeStamps (jtl_file_name)
+                jtl_stat = readDashboard(dashboard_file_name)
+
+                # jtl_stat["error"] = stat_table[5].strip()
+                # jtl_stat["average"] = stat_table[6].strip()
+                # jtl_stat["min"] = stat_table[7].strip()
+                # jtl_stat["max"] = stat_table[8].strip()
+                # jtl_stat["percentile_90"] = stat_table[9].strip()
+                # jtl_stat["percentile_95"] = stat_table[10].strip()
+                # jtl_stat["percentile_99"] = stat_table[11].strip()
+                # jtl_stat["throughput"] = stat_table[12].strip()
+
+                #latencies  = getLatencies(jtl_file_name)
 
 
 
-                average_latency = getAverageLatency(np.array(latencies))
-                min_latency = getMinLatency(np.array(latencies))
-                max_latency = getMaxLatency(np.array(latencies))
-                percentile_90= getNPercentileLatency(np.array(latencies), 90)
-                percentile_95 = getNPercentileLatency(np.array(latencies), 95)
-                percentile_99 = getNPercentileLatency(np.array(latencies), 99)
-                throughput = getThroughput(timeStamps)
-                error_rate = getErrorRate(jtl_file_name)
+                average_latency = jtl_stat["average"]
+                min_latency = jtl_stat["min"]
+                max_latency = jtl_stat["max"]
+                percentile_90= jtl_stat["percentile_90"]
+                percentile_95 = jtl_stat["percentile_95"]
+                percentile_99 = jtl_stat["percentile_99"]
+                throughput = jtl_stat["throughput"]
+                error_rate = jtl_stat["error"]
 
 
                 gc_parameters = readGCfile(gc_log_name)
