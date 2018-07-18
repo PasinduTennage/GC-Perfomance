@@ -18,15 +18,15 @@
 # ----------------------------------------------------------------------------
 
 
-concurrent_users=(1000 500 200 100 50 1) 
-heap_sizes=(500m 1g 4g) #change python script accordingly
-message_sizes=(50) # change python scripts
+concurrent_users=(1000 500 200 100 50 1)      
+heap_sizes=(200m 500m 1g 4g)
+message_sizes=(10240 1024 50)
 garbage_collectors=(UseSerialGC UseParallelGC UseG1GC UseConcMarkSweepGC)
 
 jtl_location=/home/ubuntu/pasindu/jtls
 
-springboot_host_user=ubuntu@172.31.10.195 # to be changed
-springboot_host=172.31.10.195 #to be changed
+ballerina_host_user=ubuntu@172.31.7.242
+ballerina_host=172.31.7.242
 
 target_uptime_path=/home/ubuntu/Pasindu/uptime_dir
 
@@ -42,9 +42,7 @@ gc_logs_path=/home/ubuntu/pasindu/GCLogs
 
 gc_logs_report_path=/home/ubuntu/pasindu/gcReports
 
-start_up_jmx_file=/home/ubuntu/pasindu/jmx/springboot_db_fill.jmx
-
-jmx_file=/home/ubuntu/pasindu/jmx/springboot_db.jmx
+jmx_file=/home/ubuntu/pasindu/jmx/ballerina_echo.jmx
 
 jtl_splitter_path=/home/ubuntu/pasindu/Jmeter-Split
 
@@ -54,19 +52,19 @@ jmeter_path=/home/ubuntu/pasindu/apache-jmeter-4.0/bin
 
 performance_report_python_file=/home/ubuntu/pasindu/performance/performance-report.py
 
-#payload_generator_python_file=/home/ubuntu/pasindu/performance/payloadGenarator.py
+payload_generator_python_file=/home/ubuntu/pasindu/performance/payloadGenarator.py
 
-performance_report_output_file=/home/ubuntu/pasindu/SpringBootDBPerformance.csv
+performance_report_output_file=/home/ubuntu/pasindu/BallerinaEchoPerformance.csv
 
-#payloads_output_file_root=/home/ubuntu/pasindu/payloads
+payloads_output_file_root=/home/ubuntu/pasindu/payloads
 
-#payload_files_prefix=payload
+payload_files_prefix=payload
 
 gc_viewer_jar_file=/home/ubuntu/pasindu/gc_viewer/gcviewer-1.36-SNAPSHOT.jar
 
-test_duration=120	 #to be changed to ___
+test_duration=120
 
-split_time=1 #to be changed to 5
+split_time=1
 
 rm -r $gc_logs_path/
 rm -r $dashboards_path/
@@ -76,6 +74,12 @@ rm -r $payloads_output_file_root/
 rm -r $uptime_path/
 rm $performance_report_output_file
 
+echo "Generating Payloads"
+mkdir -p $payloads_output_file_root
+
+python3 ${payload_generator_python_file} ${payloads_output_file_root}/${payload_files_prefix}
+
+echo "Finished generating payloads"
 
 for size in ${message_sizes[@]}
 do
@@ -93,34 +97,31 @@ do
         	    echo "Report location is ${report_location}"
         	    mkdir -p $report_location
 
-		    nohup ssh -i "pasindut.pem" -n -f ${springboot_host_user} "/bin/bash $target_script ${heap} ${total_users} ${target_gc_logs_path} ${gc} ${size}" &
-
-		    echo "Populating DB"
+		    nohup ssh  -n -f ${ballerina_host_user} -i pasindut.pem "/bin/bash $target_script ${heap} ${total_users} ${target_gc_logs_path} ${gc} ${size}" &
+	
 		    while true 
 		    do
 			    echo "Checking service"
-    			    response_code=$(curl -s -o /dev/null -w "%{http_code}" http://${springboot_host}:9000/db/all)
+    			    response_code=$(curl -s -o /dev/null -w "%{http_code}" http://${ballerina_host}:9090/echo/params?message=m)
     			    if [ $response_code -eq 200 ]; then
-        			    echo "Springboot started"
+        			    echo "Ballerina started"
         			    break
     			    else
         			    sleep 10
     			    fi
 		    done
-
-		    ${jmeter_path}/jmeter  -Jgroup1.host=${springboot_host}  -Jgroup1.port=9000 -n -t ${start_up_jmx_file}
-
-		    echo "Finished populating DB"
-	
-		           
-		        	
+                    
+		    message=$(<${payloads_output_file_root}/${payload_files_prefix}${size})
+		    
+                    
+	        	
 
         	    # Start JMeter server
-        	    ${jmeter_path}/jmeter  -Jgroup1.host=${springboot_host}  -Jgroup1.port=9000 -Jgroup1.threads=$u -Jgroup1.seconds=${test_duration}  -n -t ${jmx_file} -l ${report_location}/results.jtl
+        	    ${jmeter_path}/jmeter  -Jgroup1.host=${ballerina_host}  -Jgroup1.port=9090 -Jgroup1.threads=$u -Jgroup1.seconds=${test_duration} -Jgroup1.data=${message} -n -t ${jmx_file} -l ${report_location}/results.jtl
                     
                     echo "Running Uptime command"	
 
-                    nohup ssh -i "pasindut.pem" -n -f ${springboot_host_user} "/bin/bash $target_uptime_script ${heap} ${total_users} ${target_uptime_path} ${gc} ${size}" &
+                    nohup ssh  -n -f ${ballerina_host_user} -i pasindut.pem "/bin/bash $target_uptime_script ${heap} ${total_users} ${target_uptime_path} ${gc} ${size}" &
 		    
             done
 	
@@ -137,7 +138,7 @@ echo "Copying GC logs to Jmeter server machine"
 
 
 mkdir -p ${gc_logs_path}
-scp -i "pasindut.pem" -r $springboot_host_user:${target_gc_logs_path} ${gc_logs_path}
+scp -i pasindut.pem -r $ballerina_host_user:${target_gc_logs_path} ${gc_logs_path}
 
 echo "Finished Copying GC logs to server machine"
 
@@ -145,7 +146,7 @@ echo "Copying uptime logs to Jmeter server machine"
 
 
 mkdir -p ${uptime_path}
-scp -i "pasindut.pem" -r $springboot_host_user:${target_uptime_path} ${uptime_path}
+scp -i pasindut.pem -r $ballerina_host_user:${target_uptime_path} ${uptime_path}
 
 echo "Finished Copying uptime logs to server machine"
 

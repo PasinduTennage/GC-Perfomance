@@ -20,21 +20,13 @@
 
 heap_size=$1
 num_users=$2 
-target_gc_logs_path=$3
+target_uptime_path=$3
 gc=$4
 size=$5
 
 
 
+mkdir -p ${target_uptime_path}
 
-mkdir -p ${target_gc_logs_path}
-
-killall java
-sleep 10
-killall java
-
-echo "Setting Heap to ${heap_size}"
-export JVM_MEM_OPTS="-Xms${heap_size} -Xmx${heap_size}  "
         
-echo "Starting Springboot"
-java -Xloggc:${target_gc_logs_path}/${heap_size}_Heap_${num_users}_Users_${gc}_collector_${size}_size_GCLog.txt  -verbose:gc -XX:+PrintGCDateStamps -XX:+${gc} -Xms${heap_size} -Xmx${heap_size}  -jar /home/ubuntu/Pasindu/gs-actuator-service-0.1.0.jar
+uptime > ${target_uptime_path}/${heap_size}_Heap_${num_users}_Users_${gc}_collector_${size}_size_uptime.txt 

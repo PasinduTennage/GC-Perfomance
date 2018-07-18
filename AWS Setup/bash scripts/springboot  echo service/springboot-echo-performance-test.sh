@@ -19,7 +19,7 @@
 
 
 concurrent_users=(1000 500 200 100 50 1)      
-heap_sizes=(200m 500m 1g 4g 8g)
+heap_sizes=(200m 500m 1g 4g)
 message_sizes=(10240 1024 50)
 garbage_collectors=(UseSerialGC UseParallelGC UseG1GC UseConcMarkSweepGC)
 
@@ -62,9 +62,9 @@ payload_files_prefix=payload
 
 gc_viewer_jar_file=/home/ubuntu/pasindu/gc_viewer/gcviewer-1.36-SNAPSHOT.jar
 
-test_duration=120	 #to be changed to ___
+test_duration=3600
 
-split_time=1 #to be changed to 5
+split_time=5
 
 rm -r $gc_logs_path/
 rm -r $dashboards_path/

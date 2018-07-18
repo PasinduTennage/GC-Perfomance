@@ -9,14 +9,6 @@ import csv
 
 
 
-
-def getNRandomeColors(n):
-    colors = []
-    for i in range(n):
-        colors.append('%06X' % randint(0, 0xFFFFFF))
-
-    return colors
-
 def getIfHasAttribute(dictionary, key):
     if(key in list(dictionary.keys())):
         return dictionary[key]
@@ -24,10 +16,10 @@ def getIfHasAttribute(dictionary, key):
         return "NA"
 
 
-heap_sizes = ["100m", "200m", "500m", "1g", "4g"]
+heap_sizes = ["100m",  "200m", "500m", "1g", "4g"]
 concurrent_users = [1000, 500, 200, 100, 50, 1]
-message_sizes= [10240, 1024, 50]
-garbage_collectors= ["UseSerialGC", "UseParallelGC",  "UseG1GC",  "UseConcMarkSweepGC"] #, "UseParallelGC" , "UseConcMarkSweepGC"
+message_sizes= [50, 1024, 10240]
+garbage_collectors= ["UseSerialGC", "UseParallelGC",  "UseG1GC",  "UseConcMarkSweepGC"]
 
 jtl_file_root = sys.argv[1]
 gc_reports_root = sys.argv[2]

@@ -30,6 +30,8 @@ size=$5
 mkdir -p ${target_gc_logs_path}
 
 killall java
+sleep 10
+killall java
 
 echo "Setting Heap to ${heap_size}"
 export JVM_MEM_OPTS="-Xms${heap_size} -Xmx${heap_size}  "

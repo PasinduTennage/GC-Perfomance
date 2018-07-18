@@ -1,16 +1,3 @@
-import numpy as np
-from scipy.stats.kde import gaussian_kde
-
-
-
-
-def getPDF(values):
-    # Draws graphs of probability density functions for the given values distribution
-    gkde = gaussian_kde(values)
-    return gkde
-
-
-
 def getLatencies(jtl_file_name):
     jtl_file = open(jtl_file_name, "r")
     latencies = []

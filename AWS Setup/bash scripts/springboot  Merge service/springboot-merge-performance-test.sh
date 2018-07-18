@@ -18,15 +18,15 @@
 # ----------------------------------------------------------------------------
 
 
-concurrent_users=(1 50 100 200 500 1000)
+concurrent_users=(1000 500 200 100 50 1)
 heap_sizes=(100m 200m 500m 1g 4g) 
 message_sizes=(102400) #change the performance-report.py  
 garbage_collectors=(UseSerialGC UseParallelGC UseG1GC UseConcMarkSweepGC)    
 
 jtl_location=/home/ubuntu/pasindu/jtls
 
-springboot_host_user=ubuntu@172.31.10.206 #to be changed
-springboot_host=172.31.10.206 #to be changed
+springboot_host_user=ubuntu@172.31.9.39 #to be changed
+springboot_host=172.31.9.39 #to be changed
 
 target_uptime_path=/home/ubuntu/Pasindu/uptime_dir
 

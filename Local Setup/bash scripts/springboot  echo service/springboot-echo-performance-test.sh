@@ -18,10 +18,10 @@
 # ----------------------------------------------------------------------------
 
 
-concurrent_users=(500 1000) #to be changed 1 50 100 200 
-heap_sizes=(100m 200m) #to be changed  200m 500m 1g 2g 4g 8g
+concurrent_users=(1000 1) #to be changed 1 50 100 200 
+heap_sizes=(100m 4g) #to be changed  200m 500m 1g 2g 4g 8g
 message_sizes=(1024 10240) # 400 1600
-garbage_collectors=(UseSerialGC UseG1GC) #UseSerialGC UseParallelGC UseConcMarkSweepGC  
+garbage_collectors=(UseSerialGC UseParallelGC) #UseSerialGC UseParallelGC UseConcMarkSweepGC  
 
 jtl_location=/home/wso2/pasindu/jtls
 
