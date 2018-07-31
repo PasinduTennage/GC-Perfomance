@@ -33,8 +33,7 @@ killall java
 sleep 10
 killall java
 
-echo "Setting Heap to ${heap_size}"
-export JVM_MEM_OPTS="-Xms${heap_size} -Xmx${heap_size}  "
+
         
 echo "Starting Springboot"
 java -Xloggc:${target_gc_logs_path}/${heap_size}_Heap_${num_users}_Users_${gc}_collector_${size}_size_GCLog.txt  -verbose:gc -XX:+PrintGCDateStamps -XX:+${gc} -Xms${heap_size} -Xmx${heap_size}  -jar /home/ubuntu/Pasindu/gs-actuator-service-0.1.0.jar

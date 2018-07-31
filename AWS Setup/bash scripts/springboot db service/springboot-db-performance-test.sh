@@ -25,8 +25,8 @@ garbage_collectors=(UseSerialGC UseParallelGC UseG1GC UseConcMarkSweepGC)
 
 jtl_location=/home/ubuntu/pasindu/jtls
 
-springboot_host_user=ubuntu@172.31.10.195 # to be changed
-springboot_host=172.31.10.195 #to be changed
+springboot_host_user=ubuntu@172.31.26.254 # to be changed
+springboot_host=172.31.26.254 #to be changed
 
 target_uptime_path=/home/ubuntu/Pasindu/uptime_dir
 
@@ -93,21 +93,22 @@ do
         	    echo "Report location is ${report_location}"
         	    mkdir -p $report_location
 
-		    nohup ssh -i "pasindut.pem" -n -f ${springboot_host_user} "/bin/bash $target_script ${heap} ${total_users} ${target_gc_logs_path} ${gc} ${size}" &
+		    nohup ssh -i "pasindut-west.pem" -n -f ${springboot_host_user} "/bin/bash $target_script ${heap} ${total_users} ${target_gc_logs_path} ${gc} ${size}" &
 
-		    echo "Populating DB"
+		    
 		    while true 
 		    do
 			    echo "Checking service"
-    			    response_code=$(curl -s -o /dev/null -w "%{http_code}" http://${springboot_host}:9000/db/all)
+    			    response_code=$(curl -s -o /dev/null -w "%{http_code}" 'http://172.31.26.254:9000/db/add?name=madhawa&email=madhawa.13@cse.mrt.ac.lk')
     			    if [ $response_code -eq 200 ]; then
         			    echo "Springboot started"
         			    break
     			    else
-        			    sleep 10
+        			    echo $response_code
+				    sleep 10
     			    fi
 		    done
-
+		    echo "Populating DB"	
 		    ${jmeter_path}/jmeter  -Jgroup1.host=${springboot_host}  -Jgroup1.port=9000 -n -t ${start_up_jmx_file}
 
 		    echo "Finished populating DB"
@@ -120,7 +121,7 @@ do
                     
                     echo "Running Uptime command"	
 
-                    nohup ssh -i "pasindut.pem" -n -f ${springboot_host_user} "/bin/bash $target_uptime_script ${heap} ${total_users} ${target_uptime_path} ${gc} ${size}" &
+                    nohup ssh -i "pasindut-west.pem" -n -f ${springboot_host_user} "/bin/bash $target_uptime_script ${heap} ${total_users} ${target_uptime_path} ${gc} ${size}" &
 		    
             done
 	
@@ -137,7 +138,7 @@ echo "Copying GC logs to Jmeter server machine"
 
 
 mkdir -p ${gc_logs_path}
-scp -i "pasindut.pem" -r $springboot_host_user:${target_gc_logs_path} ${gc_logs_path}
+scp -i "pasindut-west.pem" -r $springboot_host_user:${target_gc_logs_path} ${gc_logs_path}
 
 echo "Finished Copying GC logs to server machine"
 
@@ -145,7 +146,7 @@ echo "Copying uptime logs to Jmeter server machine"
 
 
 mkdir -p ${uptime_path}
-scp -i "pasindut.pem" -r $springboot_host_user:${target_uptime_path} ${uptime_path}
+scp -i "pasindut-west.pem" -r $springboot_host_user:${target_uptime_path} ${uptime_path}
 
 echo "Finished Copying uptime logs to server machine"
 
